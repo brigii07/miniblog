@@ -1,6 +1,4 @@
-Technológiai stack
-Backend
-
+# Backend
 PHP (8.1 vagy újabb)
 Symfony (6.x vagy újabb)
 Doctrine ORM (adatbázis kezeléshez)
@@ -8,13 +6,13 @@ Twig (template engine)
 SQLite/MySQL/PostgreSQL (adatbázis)
 Composer (függőségkezelő)
 
-Frontend
+# Frontend
 HTML5
 CSS3
 jQuery
 AJAX (API kommunikáció)
 
-Funkciók
+# Funkciók
 ✅ Blogbejegyzések listázása
 ✅ Új bejegyzés létrehozása
 ✅ Bejegyzések törlése
@@ -22,9 +20,8 @@ Funkciók
 ✅ Validáció és hibakezelés
 ✅ Reszponzív felület
 
-Telepítés és indítás
+# Telepítés és indítás
 Előfeltételek
-
 PHP 8.1 vagy újabb
 Composer
 Node.js és npm (opcionális, fejlesztéshez)
@@ -46,41 +43,36 @@ DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
 bash# Adatbázis létrehozása
 php bin/console doctrine:database:create
 
-# Migrációk futtatása
-
-
 5. Szerver indítása
 Symfony fejlesztői szerver indítása
 symfony server:start
 
-Használat
+# Használat
 Nyisd meg a böngészőt és navigálj a http://localhost:8000 címre
 Az alkalmazás automatikusan betölti a meglévő bejegyzéseket
 Új bejegyzést az oldal tetején található űrlappal hozhatsz létre
 A bejegyzéseket a mellettük található gombokkal törölheted, a szerkesztés gomb jelenleg még nem működik.
 
-Fejlesztési parancsok
+# Fejlesztési parancsok
 Cache ürítése
 php bin/console cache:clear
 
-# Új migráció létrehozása
+Új migráció létrehozása
 php bin/console make:migration
-
-# Entitás létrehozása/módosítása
+Entitás létrehozása/módosítása
 php bin/console make:entity
-
-# Kontrollerek létrehozása
+Kontrollerek létrehozása
 php bin/console make:controller
 
-Gyakori probléma
+# Gyakori probléma
 "Invalid date" hiba a frontend-en
 A backend nem megfelelő formátumban küldi a dátumokat, ennek okán a szerkesztés sem működik, az adatbázis viszont befogadja. 
 
 
-Adatbázis kapcsolati problémák
+# Adatbázis kapcsolati problémák
 Ellenőrizd a .env.dev fájlban az adatbázis beállításokat
 Győződj meg róla, hogy az adatbázis szerver fut
 
-Composer függőségek hibái
+# Composer függőségek hibái
 Futtasd újra: composer install
 Frissítsd a függőségeket: composer update
