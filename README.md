@@ -27,7 +27,7 @@ Composer
 Node.js és npm (opcionális, fejlesztéshez)
 
 1. Projekt klónozása
-git clone <repository-url>
+git clone <https://github.com/brigii07/miniblog.git>
 cd mini-blog
 
 2. Függőségek telepítése
@@ -42,11 +42,9 @@ DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
 
 4. Adatbázis létrehozása és adattal történő feltöltés
 Adatbázis létrehozása
-php bin/console doctrine:database:create
-Ha az adatbázis üres:
-php create_table.php
-Majd:
-php add_test_data.php
+1.php bin/console doctrine:database:create
+2.php create_table.php
+3.php add_test_data.php
 
 5. Szerver indítása
 Symfony fejlesztői szerver indítása
@@ -57,17 +55,6 @@ Nyisd meg a böngészőt és navigálj a http://localhost:8000 címre.
 Az alkalmazás automatikusan betölti a meglévő bejegyzéseket.
 Új bejegyzést az oldal tetején található űrlappal hozhatsz létre.
 A bejegyzéseket a mellettük található gombokkal törölheted, a szerkesztés gomb jelenleg még nem működik.
-
-# Fejlesztési parancsok
-Cache ürítése
-php bin/console cache:clear
-
-Új migráció létrehozása
-php bin/console make:migration
-Entitás létrehozása/módosítása
-php bin/console make:entity
-Kontrollerek létrehozása
-php bin/console make:controller
 
 # Gyakori probléma
 "Invalid date" hiba a frontend-en.
