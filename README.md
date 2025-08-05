@@ -34,23 +34,28 @@ cd mini-blog
 composer install
 
 3. Környezeti változók beállítása
-Másold át a .env fájlt és állítsd be az adatbázis kapcsolatot:
-cp .env .env.dev
-Szerkeszd a .env.dev fájlt:
+A .env fájlt feltöltöttem, hogy használható legyen, ha gond van, akkor e szerint kell eljárni:
+.env fájl tartalma:
+APP_ENV=dev
+APP_SECRET=secret_key
 DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
 
-4. Adatbázis létrehozása és migrációk futtatása
-bash# Adatbázis létrehozása
+4. Adatbázis létrehozása és adattal történő feltöltés
+Adatbázis létrehozása
 php bin/console doctrine:database:create
+Ha az adatbázis üres:
+php create_table.php
+Majd:
+php add_test_data.php
 
 5. Szerver indítása
 Symfony fejlesztői szerver indítása
 symfony server:start
 
 # Használat
-Nyisd meg a böngészőt és navigálj a http://localhost:8000 címre
-Az alkalmazás automatikusan betölti a meglévő bejegyzéseket
-Új bejegyzést az oldal tetején található űrlappal hozhatsz létre
+Nyisd meg a böngészőt és navigálj a http://localhost:8000 címre.
+Az alkalmazás automatikusan betölti a meglévő bejegyzéseket.
+Új bejegyzést az oldal tetején található űrlappal hozhatsz létre.
 A bejegyzéseket a mellettük található gombokkal törölheted, a szerkesztés gomb jelenleg még nem működik.
 
 # Fejlesztési parancsok
@@ -65,13 +70,12 @@ Kontrollerek létrehozása
 php bin/console make:controller
 
 # Gyakori probléma
-"Invalid date" hiba a frontend-en
+"Invalid date" hiba a frontend-en.
 A backend nem megfelelő formátumban küldi a dátumokat, ennek okán a szerkesztés sem működik, az adatbázis viszont befogadja. 
 
-
 # Adatbázis kapcsolati problémák
-Ellenőrizd a .env.dev fájlban az adatbázis beállításokat
-Győződj meg róla, hogy az adatbázis szerver fut
+Ellenőrizd a .env.dev fájlban az adatbázis beállításokat.
+Győződj meg róla, hogy az adatbázis szerver fut.
 
 # Composer függőségek hibái
 Futtasd újra: composer install
