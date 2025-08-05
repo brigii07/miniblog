@@ -27,7 +27,7 @@ Composer
 Node.js és npm (opcionális, fejlesztéshez)
 
 1. Projekt klónozása
-git clone <https://github.com/brigii07/miniblog.git>
+git clone <https://github.com/brigii07/miniblog.git> - vagy Github desktoppal
 cd mini-blog
 
 2. Függőségek telepítése
