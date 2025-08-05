@@ -1,0 +1,15 @@
+api_posts:
+    path: /api/posts
+    controller: App\Controller\ApiController::posts
+    methods: [GET, POST]
+
+api_post:
+    path: /api/posts/{id}
+    controller: App\Controller\ApiController::post
+    methods: [GET, PUT, DELETE]
+    requirements:
+        id: '\d+'
+
+homepage:
+    path: /
+    controller: App\Controller\PageController::index

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Blog</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>Mini Blog</h1>
+        
+        <h2>Új bejegyzés létrehozása</h2>
+        <form id="post-form">
+            <div class="form-group">
+                <label for="title">Cím:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="author">Szerző:</label>
+                <input type="text" id="author" name="author" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Tartalom:</label>
+                <textarea id="content" name="content" required></textarea>
+            </div>
+            
+            <button type="submit">Bejegyzés létrehozása</button>
+            <span class="loading">Mentés...</span>
+        </form>
+        
+        <div id="form-errors" class="error"></div>
+        <div id="form-success" class="success"></div>
+    </div>
+    
+    <div class="container">
+        <h2>Blogbejegyzések</h2>
+        <div id="posts-loading" class="loading">Betöltés...</div>
+        <div id="posts-container"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Load posts on page load
+            loadPosts();
+            
+            // Handle form submission
+            $('#post-form').on('submit', function(e) {
+                e.preventDefault();
+                createPost();
+            });
+        });
+        
+        function loadPosts() {
+            $('#posts-loading').show();
+            $('#posts-container').empty();
+            
+            $.ajax({
+                url: '/api/posts',
+                type: 'GET',
+                dataType: 'json',
+                success: function(posts) {
+                    $('#posts-loading').hide();
+                    displayPosts(posts);
+                },
+                error: function(xhr, status, error) {
+                    $('#posts-loading').hide();
+                    console.error('Error loading posts:', error);
+                    $('#posts-container').html('<div class="error">Hiba a bejegyzések betöltése során.</div>');
+                }
+            });
+        }
+        
+        function displayPosts(posts) {
+            const container = $('#posts-container');
+            
+            if (posts.length === 0) {
+                container.html('<p>Még nincsenek bejegyzések.</p>');
+                return;
+            }
+            
+            posts.forEach(function(post) {
+                const postElement = createPostElement(post);
+                container.append(postElement);
+            });
+        }
+        
+        function createPostElement(post) {
+    let createdAt = 'Invalid Date';
+    let updatedAt = 'Invalid Date';
+
+    // Improved date parsing function
+    function parseDateTime(dateString) {
+        if (!dateString) return 'Invalid Date';
+        
+        try {
+            // Try parsing as ISO string first (recommended format from backend)
+            let date = new Date(dateString);
+            
+            // If that fails, try manual parsing for various formats
+            if (isNaN(date.getTime())) {
+                // Handle format like "2024-01-15 10:30:45"
+                if (dateString.includes(' ') && dateString.includes('-') && dateString.includes(':')) {
+                    const [datePart, timePart] = dateString.split(' ');
+                    const [year, month, day] = datePart.split('-').map(Number);
+                    const [hour, minute, second] = timePart.split(':').map(Number);
+                    
+                    // Create date with proper validation
+                    if (year && month && day && !isNaN(hour) && !isNaN(minute)) {
+                        date = new Date(year, month - 1, day, hour, minute, second || 0);
+                    }
+                }
+            }
+            
+            // Final validation
+            if (isNaN(date.getTime())) {
+                return 'Invalid Date';
+            }
+            
+            return date.toLocaleString('hu-HU', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        } catch (error) {
+            console.error('Date parsing error:', error, 'for date:', dateString);
+            return 'Invalid Date';
+        }
+    }
+
+    createdAt = parseDateTime(post.createdAt);
+    updatedAt = parseDateTime(post.updatedAt);
+            
+    return `
+        <div class="post" data-id="${post.id}">
+            <h3>${escapeHtml(post.title)}</h3>
+            <div class="post-meta">
+                Szerző: ${escapeHtml(post.author)} |
+                Létrehozva: ${createdAt}
+                ${post.createdAt !== post.updatedAt ?
+                ' | Módosítva: ' + updatedAt : ''}
+            </div>
+            <div class="post-content">${escapeHtml(post.content)}</div>
+            <div class="post-actions">
+                <button class="btn-secondary edit-btn" onclick="editPost(${post.id})">Szerkesztés</button>
+                <button class="btn-danger delete-btn" onclick="deletePost(${post.id})">Törlés</button>
+            </div>
+            <div class="edit-form" id="edit-form-${post.id}">
+                <h4>Bejegyzés szerkesztése</h4>
+                <div class="form-group">
+                    <label>Cím:</label>
+                    <input type="text" id="edit-title-${post.id}" value="${escapeHtml(post.title)}">
+                </div>
+                <div class="form-group">
+                    <label>Szerző:</label>
+                    <input type="text" id="edit-author-${post.id}" value="${escapeHtml(post.author)}">
+                </div>
+                <div class="form-group">
+                    <label>Tartalom:</label>
+                    <textarea id="edit-content-${post.id}">${escapeHtml(post.content)}</textarea>
+                </div>
+                <button class="btn-success" onclick="savePost(${post.id})">Mentés</button>
+                <button class="btn-secondary" onclick="cancelEdit(${post.id})">Mégse</button>
+                <div id="edit-errors-${post.id}" class="error"></div>
+            </div>
+        </div>
+    `;
+}
+        
+        function createPost() {
+            const formData = {
+                title: $('#title').val(),
+                author: $('#author').val(),
+                content: $('#content').val()
+            };
+            
+            $('.loading').show();
+            $('#form-errors').empty();
+            $('#form-success').empty();
+            
+            $.ajax({
+                url: '/api/posts',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                dataType: 'json',
+                success: function(post) {
+                    $('.loading').hide();
+                    $('#form-success').text('Bejegyzés sikeresen létrehozva!');
+                    $('#post-form')[0].reset();
+                    
+                    const postElement = createPostElement(post);
+                    $('#posts-container').prepend(postElement);
+                    
+                    
+                    setTimeout(function() {
+                        $('#form-success').empty();
+                    }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    $('.loading').hide();
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.errors) {
+                        $('#form-errors').html(response.errors.join('<br>'));
+                    } else {
+                        $('#form-errors').text('Hiba történt a bejegyzés létrehozása során.');
+                    }
+                }
+            });
+        }
+        
+        function deletePost(id) {
+            if (!confirm('Biztosan törölni szeretnéd ezt a bejegyzést?')) {
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/posts/${id}`,
+                type: 'DELETE',
+                success: function() {
+                    $(`.post[data-id="${id}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    alert('Hiba történt a bejegyzés törlése során.');
+                }
+            });
+        }
+        
+        function editPost(id) {
+            $(`#edit-form-${id}`).slideDown();
+            $(`.post[data-id="${id}"] .edit-btn`).prop('disabled', true);
+        }
+        
+        function cancelEdit(id) {
+            $(`#edit-form-${id}`).slideUp();
+            $(`.post[data-id="${id}"] .edit-btn`).prop('disabled', false);
+            $(`#edit-errors-${id}`).empty();
+        }
+        
+        function savePost(id) {
+            const formData = {
+                title: $(`#edit-title-${id}`).val(),
+                author: $(`#edit-author-${id}`).val(),
+                content: $(`#edit-content-${id}`).val()
+            };
+            
+            $(`#edit-errors-${id}`).empty();
+            
+            $.ajax({
+                url: `/api/posts/${id}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                dataType: 'json',
+                success: function(post) {
+                    // Update the post display
+                    const postElement = $(`.post[data-id="${id}"]`);
+                    const newPostElement = $(createPostElement(post));
+                    postElement.replaceWith(newPostElement);
+                },
+                error: function(xhr, status, error) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.errors) {
+                        $(`#edit-errors-${id}`).html(response.errors.join('<br>'));
+                    } else {
+                        $(`#edit-errors-${id}`).text('Hiba történt a bejegyzés módosítása során.');
+                    }
+                }
+            });
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
